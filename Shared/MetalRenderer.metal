@@ -41,15 +41,15 @@ float hit_sphere(thread const float3 & center,
                 float radius,
                 thread const ray & r) {
     float3 oc = r.origin - center;
-    auto a = dot(r.direction, r.direction);
-    auto b = 2 * dot(oc, r.direction);
-    auto c = dot(oc, oc) - (radius * radius);
-    auto discriminant = (b * b) - (4 * a * c);
+    auto a = length_squared(r.direction);
+    auto halfB = dot(oc, r.direction);
+    auto c = length_squared(oc) - (radius * radius);
+    auto discriminant = (halfB * halfB) - (a * c);
     if (discriminant < 0) {
         return -1.0;
     }
     else {
-        return (-b - sqrt(discriminant)) / (2.0 * a);
+        return (-halfB - sqrt(discriminant)) / a;
     }
 }
 
