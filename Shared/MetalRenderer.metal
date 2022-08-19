@@ -124,21 +124,8 @@ public:
     : origin(origin), direction(direction)
     {}
     
-    float3 at(float t) const {
+    inline float3 at(float t) const {
         return origin + (t * direction);
-    }
-};
-
-
-struct hit_record {
-    float3 p;
-    float3 normal;
-    float t;
-    bool front_face;
-    
-    void set_face_normal(thread const ray & r, thread const float3 & outward_normal) {
-        front_face = dot(r.direction, outward_normal) < 0;
-        normal = front_face ? outward_normal : -outward_normal;
     }
 };
 
@@ -162,11 +149,12 @@ public:
         lower_left_corner = origin - (horizontal / 2) - (vertical / 2) - float3(0, 0, focal_length);
     }
     
-    ray get_ray(float2 uv) const {
+    inline ray get_ray(float2 uv) const {
         float3 ray_direction = normalize(lower_left_corner + (uv.x * horizontal) + (uv.y * vertical) - origin);
         return ray(origin, ray_direction);
     }
 };
+
 
 
 //class hittable {
@@ -179,19 +167,79 @@ public:
 //    }
 //};
 
+struct material;
+
+
+struct hit_record {
+    float3 p;
+    float3 normal;
+    thread material * m;
+    float t;
+    bool front_face;
+    
+    inline void set_face_normal(thread const ray & r, thread const float3 & outward_normal) {
+        front_face = dot(r.direction, outward_normal) < 0;
+        normal = front_face ? outward_normal : -outward_normal;
+    }
+};
+
+
+class material {
+    
+private:
+    int type;
+    float3 albedo;
+    float roughness;
+    
+public:
+    material(int type, float3 albedo, float roughness)
+    : type(type), albedo(albedo), roughness(roughness) {}
+    
+    bool scatter(thread const ray & r,
+                                  thread const hit_record & rec,
+                                  thread random & rng,
+                                  thread float3 & attenuation,
+                                  thread ray & scattered) {
+        auto diffuse_direction = sample_unit_hemisphere(rng.next_float2(-1, +1), rec.normal);
+        if (type == 0) {
+        //            float3 target = normalize(rec.normal + sample_unit_sphere(rng.next_float2(-1, +1)));
+        //                    float3 target = sample_unit_hemisphere(rng.next_float2(-1, +1), rec.normal);
+        //            float3 target = normalize(rec.normal + sampleCosineWeightedHemisphere(rng.next_float2(-1, 1)));
+        // float3 target = normalize(rec.normal + normalize(rng.next_float3(-1, 1)));
+            scattered = ray(rec.p, diffuse_direction);
+            attenuation = albedo;
+            return true;
+        }
+        else if (type == 1) {
+            float3 reflected = normalize(reflect(r.direction, rec.normal) + (roughness * diffuse_direction));
+            scattered = ray(rec.p, reflected);
+            attenuation = albedo;
+            return (dot(reflected, rec.normal) > 0);
+        }
+        else {
+            return false;
+        }
+    }
+};
+
+
 
 class sphere {
     
 public:
     float3 center;
     float radius;
+    thread material * m;
     
 public:
-    sphere(thread const float3 & center, float radius)
-    : center(center), radius(radius)
+    sphere(thread const float3 & center, float radius, thread material * m)
+    : center(center), radius(radius), m(m)
     {}
     
-    bool hit(thread const ray & r, float t_min, float t_max, thread hit_record & rec) const {
+    inline bool hit(thread const ray & r,
+                    const float t_min,
+                    const float t_max,
+                    thread hit_record & rec) const {
         float3 oc = r.origin - center;
         auto a = length_squared(r.direction);
         auto halfB = dot(oc, r.direction);
@@ -215,6 +263,7 @@ public:
         rec.t = root;
         rec.p = p;
         rec.set_face_normal(r, n);
+        rec.m = m;
         return true;
     }
 };
@@ -232,7 +281,7 @@ public:
     : count(count), items(items)
     {}
     
-    bool hit(thread const ray & r, float t_min, float t_max, thread hit_record & rec) const {
+    inline bool hit(thread const ray & r, float t_min, float t_max, thread hit_record & rec) const {
         hit_record temp_rec;
         float closest = t_max;
         bool hit_anything = false;
@@ -254,23 +303,22 @@ float3 ray_color(thread const ray & primary_ray,
                  thread const hittable_list & world) {
     hit_record rec;
     ray r = primary_ray;
-    const int max_depth = 2;
+    const int max_depth = 10;
     int depth = 0;
     float3 attenuation = float3(1, 1, 1);
     while (depth < max_depth) {
         //
         if (world.hit(r, 0.001, INFINITY, rec) == true) {
-//            float3 target = normalize(rec.normal + sample_unit_sphere(rng.next_float2(-1, +1)));
-            float3 target = sample_unit_hemisphere(rng.next_float2(-1, +1), rec.normal);
-//            float3 target = normalize(rec.normal + sampleCosineWeightedHemisphere(rng.next_float2(-1, 1)));
-            // float3 target = normalize(rec.normal + normalize(rng.next_float3(-1, 1)));
-            r.direction = target;
-            r.origin = rec.p;
-//            return 0.5 * (rec.normal + float3(1, 1, 1));
-//            return 0.5 * (target + float3(1, 1, 1));
-            attenuation = 0.5 * attenuation; // * float3(0.9);
-//            return 0.5 * (target + float3(1, 1, 1));
-            depth += 1;
+            float3 bounce_attenuation;
+            ray bounce_ray;
+            if (rec.m->scatter(r, rec, rng, bounce_attenuation, bounce_ray)) {
+                r = bounce_ray;
+                attenuation = bounce_attenuation * attenuation;
+                depth += 1;
+            }
+            else {
+                return float3(0, 0, 0);
+            }
         }
         else {
             float3 unit_direction = r.direction;
@@ -305,12 +353,19 @@ kernel void render(texture2d<float, access::read_write> accumulator [[texture(0)
 
     // TODO: Pass camera and scene as parameters
     const auto cam = camera(aspect_ratio);
+    
+    auto yellow_lambertian_material = material(0, float3(0.8, 0.8, 0.0), 1);
+    auto pink_lambertian_material = material(0, float3(0.7, 0.3, 0.3), 1);
+    auto gray_metal_material = material(1, float3(0.8, 0.8, 0.8), 0.3);
+    auto brown_metal_material = material(1, float3(0.8, 0.6, 0.2), 1);
 
     sphere items[] = {
-        sphere(float3(0, 0, -1), 0.5),
-        sphere(float3(0, -100.5, -1), 100),
+        sphere(float3(0, -100.5, -1), 100, &yellow_lambertian_material),
+        sphere(float3(0, 0, -1), 0.5, &pink_lambertian_material),
+        sphere(float3(-1, 0, -1), 0.5, &gray_metal_material),
+        sphere(float3(+1, 0, -1), 0.5, &brown_metal_material),
     };
-    auto world = hittable_list(2, items);
+    auto world = hittable_list(4, items);
 
     auto uv_offset = rng.next_float2(-0.5, +0.5) / dimensions;
     ray r = cam.get_ray(uv + uv_offset);

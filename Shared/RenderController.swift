@@ -171,7 +171,7 @@ final class MetalRenderer {
         Task.detached {
             while true {
                 await self.renderer.render()
-//                try await Task.sleep(nanoseconds: UInt64(0.5 * TimeInterval(1_000_000_000)))
+                try await Task.sleep(nanoseconds: UInt64(0.001 * TimeInterval(1_000_000_000)))
             }
         }
     }
