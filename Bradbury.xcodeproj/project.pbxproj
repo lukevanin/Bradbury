@@ -22,6 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FC3A06F028AFA17800C6DE91 /* RendererInterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RendererInterface.h; sourceTree = "<group>"; };
+		FC3A06F128AFA1FE00C6DE91 /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		FCFCA59828AD8CBA0015A69E /* BradburyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BradburyApp.swift; sourceTree = "<group>"; };
 		FCFCA59928AD8CBA0015A69E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FCFCA59A28AD8CBC0015A69E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -67,7 +69,9 @@
 				FCFCA59928AD8CBA0015A69E /* ContentView.swift */,
 				FCFCA5B628AD8CD80015A69E /* RenderController.swift */,
 				FCFCA5BF28AE28610015A69E /* CoreGraphicsExtensions.swift */,
+				FC3A06F028AFA17800C6DE91 /* RendererInterface.h */,
 				FCFCA5B928AD8DF70015A69E /* MetalRenderer.metal */,
+				FC3A06F128AFA1FE00C6DE91 /* Bridging-Header.h */,
 				FCFCA59A28AD8CBC0015A69E /* Assets.xcassets */,
 			);
 			path = Shared;
@@ -265,6 +269,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Shared/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -316,6 +321,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Shared/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
@@ -346,6 +352,7 @@
 				PRODUCT_NAME = Bradbury;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Shared/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -377,6 +384,7 @@
 				PRODUCT_NAME = Bradbury;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(PROJECT_DIR)/Shared/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;

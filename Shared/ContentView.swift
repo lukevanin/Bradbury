@@ -16,7 +16,7 @@ struct ContentView: View {
         ZStack {
             if let image = renderController.image {
                 Image(image, scale: 1.0, label: Text("Image"))
-                    .background(Color.green)
+                    .background(Color.pink)
                     .frame(width: CGFloat(image.width), height: CGFloat(image.height))
             }
             else {

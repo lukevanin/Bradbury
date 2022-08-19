@@ -3,11 +3,12 @@ import CoreGraphics
 import MetalKit
 
 
+
 private func generateRandomData(_ buffer: MTLBuffer) {
     let count = buffer.length / MemoryLayout<Float>.size
     let rawPointer = buffer.contents().assumingMemoryBound(to: Float.self)
     for i in 0 ..< count {
-        rawPointer[i] = Float.random(in: 0 ..< 1)
+        rawPointer[i] = Float(drand48()) // Float.random(in: 0 ..< 1)
     }
 }
 
@@ -18,8 +19,11 @@ final class MetalRenderer {
     
     var completion: Completion?
     
+    private var sampleCount = Float(0)
+    
     private let width: Int
     private let height: Int
+    private let noiseBufferSize: Int = 1024
     private let device: MTLDevice
     private let library: MTLLibrary
     private let function: MTLFunction
@@ -28,9 +32,10 @@ final class MetalRenderer {
 //    private let bufferA: MTLBuffer
 //    private let bufferB: MTLBuffer
 //    private let bufferResult: MTLBuffer
-    private let inputTexture: MTLTexture
+    private let noiseBuffer: MTLBuffer
+    private let accumulatorTexture: MTLTexture
     private let outputTexture: MTLTexture
-    
+
     init(width: Int, height: Int, device: MTLDevice) {
         self.width = width
         self.height = height
@@ -40,18 +45,19 @@ final class MetalRenderer {
         self.computePipelineState = try! device.makeComputePipelineState(function: function)
         self.commandQueue = device.makeCommandQueue()!
         
-        self.inputTexture = device.makeTexture(
+        self.accumulatorTexture = device.makeTexture(
             descriptor: {
                 let descriptor = MTLTextureDescriptor.texture2DDescriptor(
-                    pixelFormat: .bgra8Unorm,
+                    pixelFormat: .rgba32Float,
                     width: width,
                     height: height,
                     mipmapped: false
                 )
-                descriptor.usage = .shaderRead
+                descriptor.usage = [.shaderRead, .shaderWrite]
                 return descriptor
             }()
         )!
+        
         self.outputTexture = device.makeTexture(
             descriptor: {
                 let descriptor = MTLTextureDescriptor.texture2DDescriptor(
@@ -60,15 +66,13 @@ final class MetalRenderer {
                     height: height,
                     mipmapped: false
                 )
-                descriptor.usage = .shaderWrite
+                descriptor.usage = [.shaderWrite]
                 return descriptor
             }()
         )!
         // TODO: Use cpu write combined mode for write-only buffers
-//        self.bufferSize = MemoryLayout<Float>.size * 1_000_000
-//        self.bufferA = device.makeBuffer(length: bufferSize, options: [.storageModeShared])!
-//        self.bufferB = device.makeBuffer(length: bufferSize, options: [.storageModeShared])!
-//        self.bufferResult = device.makeBuffer(length: bufferSize, options: [.storageModeShared])!
+        let bufferSize = MemoryLayout<Float>.size * noiseBufferSize
+        self.noiseBuffer = device.makeBuffer(length: bufferSize, options: [.storageModeShared])!
     }
     
 //    func prepare() {
@@ -79,29 +83,41 @@ final class MetalRenderer {
     func render() {
         let commandBuffer = commandQueue.makeCommandBuffer()!
         let computeEncoder = commandBuffer.makeComputeCommandEncoder()!
-        commandBuffer.addCompletedHandler { [weak self] commandBuffer in
-            switch commandBuffer.status {
-            case .committed:
-                print("comitted")
-            case .notEnqueued:
-                print("not enqueued")
-            case .enqueued:
-                print("enqueued")
-            case .scheduled:
-                print("scheduled")
-            case .completed:
-                let duration = commandBuffer.gpuEndTime - commandBuffer.gpuStartTime
-                print("completed \(String(format: "%0.12f", duration)) seconds")
-                self?.outputImage()
-            case .error:
-                print("error")
-            @unknown default:
-                print("unknown")
-            }
-        }
+//        commandBuffer.addCompletedHandler { [weak self] commandBuffer in
+//            switch commandBuffer.status {
+//            case .committed:
+//                print("comitted")
+//            case .notEnqueued:
+//                print("not enqueued")
+//            case .enqueued:
+//                print("enqueued")
+//            case .scheduled:
+//                print("scheduled")
+//            case .completed:
+//                let duration = commandBuffer.gpuEndTime - commandBuffer.gpuStartTime
+//                print("completed \(String(format: "%0.12f", duration)) seconds")
+//                self?.outputImage()
+//            case .error:
+//                print("error")
+//            @unknown default:
+//                print("unknown")
+//            }
+//        }
+        
+        sampleCount += 1
+        var environment = render_parameters(
+            noise_buffer_size: Int32(noiseBufferSize),
+            noise_offset: 0,
+            sample_count: sampleCount
+        )
+        computeEncoder.setBytes(&environment, length: MemoryLayout<render_parameters>.stride, index: 0)
+        
+        generateRandomData(noiseBuffer)
+        computeEncoder.setBuffer(noiseBuffer, offset: 0, index: 1)
 
-        computeEncoder.setTexture(inputTexture, index: 0)
+        computeEncoder.setTexture(accumulatorTexture, index: 0)
         computeEncoder.setTexture(outputTexture, index: 1)
+        
         let gridSize = MTLSize(
             width: width,
             height: height,
@@ -112,16 +128,15 @@ final class MetalRenderer {
             height: computePipelineState.maxTotalThreadsPerThreadgroup / computePipelineState.threadExecutionWidth,
             depth: 1
         )
-//        let threadGroupCount = MTLSize(
-//            width: (gridSize.width + threadGroupSize.width - 1) / threadGroupSize.width,
-//            height: (gridSize.height + threadGroupSize.height - 1) / threadGroupSize.height,
-//            depth: 1
-//        )
         computeEncoder.setComputePipelineState(computePipelineState)
         computeEncoder.dispatchThreads(gridSize, threadsPerThreadgroup: threadGroupSize)
-//        computeEncoder.dispatchThreads(threadGroupCount, threadsPerThreadgroup: threadGroupSize)
         computeEncoder.endEncoding()
         commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
+        let duration = commandBuffer.gpuEndTime - commandBuffer.gpuStartTime
+        print("completed \(String(format: "%0.12f", duration)) seconds")
+        self.outputImage()
+
     }
     
     private func outputImage() {
@@ -130,22 +145,6 @@ final class MetalRenderer {
         }
         completion?(image)
     }
-    
-//    private func verifyResults() {
-//        let count = bufferResult.length / MemoryLayout<Float>.size
-//        let a = bufferA.contents().assumingMemoryBound(to: Float.self)
-//        let b = bufferB.contents().assumingMemoryBound(to: Float.self)
-//        let r = bufferResult.contents().assumingMemoryBound(to: Float.self)
-//        var fail = 0
-//        for i in 0 ..< count {
-//            let result = a[i] + b[i]
-//            if result != r[i] {
-//                print("Expected \(result) @\(i) but got \(r[i])")
-//                fail += 1
-//            }
-//        }
-//        print("checked \(bufferSize) results, found \(fail) failures")
-//    }
 }
 
 
@@ -169,6 +168,11 @@ final class MetalRenderer {
     }
     
     func start() {
-        renderer.render()
+        Task.detached {
+            while true {
+                await self.renderer.render()
+//                try await Task.sleep(nanoseconds: UInt64(0.5 * TimeInterval(1_000_000_000)))
+            }
+        }
     }
 }
