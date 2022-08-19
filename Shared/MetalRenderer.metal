@@ -97,15 +97,43 @@ public:
 };
 
 
+struct hittable_list {
+    
+public:
+    int count;
+    thread const sphere * items;
+    
+public:
+    hittable_list(int count, sphere items[])
+    : count(count), items(items)
+    {}
+    
+    bool hit(thread const ray & r, float t_min, float t_max, thread hit_record & rec) const {
+        hit_record temp_rec;
+        float closest = t_max;
+        bool hit_anything = false;
+        for (auto i = 0; i < count; i++) {
+            const auto item = items[i];
+            if (item.hit(r, t_min, closest, temp_rec) == true) {
+                closest = temp_rec.t;
+                rec = temp_rec;
+                hit_anything = true;
+            }
+        }
+        return hit_anything;
+    }
+};
+
+
 //float hit_sphere(thread const float3 & center,
 //                float radius,
 //                thread const ray & r) {
 //}
 
 
-float3 ray_color(thread const ray & r, thread const sphere & world) {
+float3 ray_color(thread const ray & r, thread const hittable_list & world) {
     hit_record rec;
-    if (world.hit(r, 0, 10000, rec)) {
+    if (world.hit(r, 0, INFINITY, rec) == true) {
         return 0.5 * (rec.normal + float3(1, 1, 1));
     }
     float3 unit_direction = normalize(r.direction);
@@ -136,7 +164,11 @@ kernel void render(texture2d<float, access::read> input [[texture(0)]],
     float3 ray_direction = lower_left_corner + (u * horizontal) + (v * vertical) - origin;
     ray r(origin, ray_direction);
     
-    auto world = sphere(float3(0, 0, -1), 0.5);
+    sphere items[] = {
+        sphere(float3(0, 0, -1), 0.5),
+        sphere(float3(0, -100.5, -1), 100),
+    };
+    auto world = hittable_list(2, items);
 
     float4 color = float4(ray_color(r, world), 1);
 //    float4 color = float4(u, u * v, 1 - v, 1);
