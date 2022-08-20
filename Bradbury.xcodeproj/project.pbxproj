@@ -24,6 +24,7 @@
 /* Begin PBXFileReference section */
 		FC3A06F028AFA17800C6DE91 /* RendererInterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RendererInterface.h; sourceTree = "<group>"; };
 		FC3A06F128AFA1FE00C6DE91 /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
+		FCF4484A28B1A32B00CC31EC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		FCFCA59828AD8CBA0015A69E /* BradburyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BradburyApp.swift; sourceTree = "<group>"; };
 		FCFCA59928AD8CBA0015A69E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FCFCA59A28AD8CBC0015A69E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -56,6 +57,7 @@
 		FCFCA59228AD8CBA0015A69E = {
 			isa = PBXGroup;
 			children = (
+				FCF4484A28B1A32B00CC31EC /* README.md */,
 				FCFCA59728AD8CBA0015A69E /* Shared */,
 				FCFCA5A628AD8CBC0015A69E /* macOS */,
 				FCFCA5A028AD8CBC0015A69E /* Products */,
