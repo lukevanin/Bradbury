@@ -106,7 +106,7 @@ final class MetalRenderer {
         
         sampleCount += 1
         var environment = render_parameters(
-            noise_buffer_size: Int32(noiseBufferSize),
+            noise_buffer_size: UInt32(noiseBufferSize),
             noise_offset: 0,
             sample_count: sampleCount
         )
