@@ -4,31 +4,19 @@
 #include <simd/simd.h>
 
 
-//struct material_param {
-//    int type;
-//    vector_float3 albedo;
-//    float roughness;
-//    float index_of_refraction;
-//};
+typedef struct MaterialParam {
+    char type;
+    simd_float3 albedo;
+    float roughness;
+    float indexOfRefraction;
+} MaterialParam;
 
 
-//struct sphere_param {
-//    vector_float3 center;
-//    float radius;
-//    material_param m;
-//};
-
-
-//struct list_param {
-//    array<sphere_param, uint> items;
-//};
-
-
-struct render_parameters {
-    uint noise_buffer_size;
-    uint noise_offset;
-    float sample_count;
-};
+typedef struct SphereParam {
+    simd_float3 center;
+    float radius;
+    MaterialParam material;
+} SphereParam;
 
 
 #endif /* RendererInterface_h */

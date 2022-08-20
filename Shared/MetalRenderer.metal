@@ -3,6 +3,38 @@
 using namespace metal;
 
 
+struct material_param {
+    char type;
+    float3 albedo;
+    float roughness;
+    float index_of_refraction;
+};
+
+
+struct sphere_param {
+    float3 center;
+    // float _n0;
+    float radius;
+//    float _n1, _n2, n3;
+    material_param m;
+};
+
+
+//struct sphere_list_param {
+//    uint count;
+//    device array<sphere_param, uint> items;
+//};
+
+
+struct render_params {
+    uint noise_buffer_size;
+    uint noise_offset;
+    float sample_count;
+    uint sphere_count;
+};
+
+
+
 float3 lerp(float3 a, float3 b, float t) {
     return (1.0 - t) * a + t * b;
 }
@@ -229,7 +261,7 @@ struct material;
 struct hit_record {
     float3 p;
     float3 normal;
-    thread material * m;
+    material_param m;
     float t;
     bool front_face;
     
@@ -240,110 +272,90 @@ struct hit_record {
 };
 
 
-class material {
+
+inline bool scatter(material_param material,
+                    thread const ray & r,
+                    thread const hit_record & rec,
+                    thread random & rng,
+                    thread float3 & attenuation,
+                    thread ray & scattered) {
     
-private:
-    int type;
-    float3 albedo;
-    float roughness;
-    float index_of_refraction;
-    
-public:
-    material(int type, float3 albedo, float roughness, float index_of_refraction)
-    : type(type), albedo(albedo), roughness(roughness), index_of_refraction(index_of_refraction) {}
-    
-    bool scatter(thread const ray & r,
-                 thread const hit_record & rec,
-                 thread random & rng,
-                 thread float3 & attenuation,
-                 thread ray & scattered) {
-        auto diffuse_direction = sample_unit_hemisphere(rng.next_float2(-1, +1), rec.normal);
+    auto diffuse_direction = sample_unit_hemisphere(rng.next_float2(-1, +1), rec.normal);
 //        float3 diffuse_direction = normalize(rec.normal + sample_unit_sphere(rng.next_float2(-1, +1)));
 //                    float3 target = normalize(rec.normal + sampleCosineWeightedHemisphere(rng.next_float2(-1, 1)));
 //        float3 diffuse_direction = normalize(rec.normal + normalize(rng.next_float3(-1, 1)));
-        if (type == 0) {
-            scattered = ray(rec.p, normalize(diffuse_direction));
-            attenuation = albedo;
-            return true;
-        }
-        else if (type == 1) {
-            float3 reflected = reflect(r.direction, rec.normal) + (roughness * diffuse_direction);
+    if (material.type == 0) {
+        scattered = ray(rec.p, normalize(diffuse_direction));
+        attenuation = material.albedo;
+        return true;
+    }
+    else if (material.type == 1) {
+        float3 reflected = normalize(reflect(r.direction, rec.normal) + (material.roughness * diffuse_direction));
+        scattered = ray(rec.p, reflected);
+        attenuation = material.albedo;
+        return (dot(reflected, rec.normal) > 0);
+    }
+    else if (material.type == 2) {
+        attenuation = float3(1, 1, 1);
+        float refraction_ratio = rec.front_face ? (1 / material.index_of_refraction) : material.index_of_refraction;
+        float cos_theta = fmin(dot(-r.direction, rec.normal), 1.0);
+        float3 refracted = refract(r.direction, rec.normal, refraction_ratio);
+        float3 reflected = reflect(r.direction, rec.normal); // + (roughness * diffuse_direction));
+        if (length_squared(refracted) == 0) {
             scattered = ray(rec.p, normalize(reflected));
-            attenuation = albedo;
-            return (dot(reflected, rec.normal) > 0);
         }
-        else if (type == 2) {
-            attenuation = float3(1, 1, 1);
-            float refraction_ratio = rec.front_face ? (1 / index_of_refraction) : index_of_refraction;
-            float cos_theta = fmin(dot(-r.direction, rec.normal), 1.0);
-            float3 refracted = refract(r.direction, rec.normal, refraction_ratio);
-            float3 reflected = reflect(r.direction, rec.normal); // + (roughness * diffuse_direction));
-            if (length_squared(refracted) == 0) {
+        else {
+            float reflect_probability = reflectance(cos_theta, refraction_ratio);
+            bool reflect = rng.next_float(0, 1) < reflect_probability;
+            if (reflect == true) {
                 scattered = ray(rec.p, normalize(reflected));
             }
             else {
-                float reflect_probability = reflectance(cos_theta, refraction_ratio);
-                bool reflect = rng.next_float(0, 1) < reflect_probability;
-                if (reflect == true) {
-                    scattered = ray(rec.p, normalize(reflected));
-                }
-                else {
-                    scattered = ray(rec.p, normalize(refracted));
-                }
-            }
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-};
-
-
-
-class sphere {
-    
-public:
-    float3 center;
-    float radius;
-    thread material * m;
-    
-public:
-    sphere(thread const float3 & center, float radius, thread material * m)
-    : center(center), radius(radius), m(m)
-    {}
-    
-    inline bool hit(thread const ray & r,
-                    const float t_min,
-                    const float t_max,
-                    thread hit_record & rec) const {
-        float3 oc = r.origin - center;
-        auto a = length_squared(r.direction);
-        auto halfB = dot(oc, r.direction);
-        auto c = length_squared(oc) - (radius * radius);
-        auto discriminant = (halfB * halfB) - (a * c);
-        if (discriminant < 0) {
-            return false;
-        }
-        
-        auto sqrt_d = sqrt(discriminant);
-        auto root = (-halfB - sqrt_d) / a;
-        if (root < t_min || root > t_max) {
-            root = (-halfB + sqrt_d) / a;
-            if (root < t_min || root > t_max) {
-                return false;
+                scattered = ray(rec.p, normalize(refracted));
             }
         }
-        
-        auto p = r.at(root);
-        auto n = normalize((p - center) / radius);
-        rec.t = root;
-        rec.p = p;
-        rec.set_face_normal(r, n);
-        rec.m = m;
         return true;
     }
-};
+    else {
+        return false;
+    }
+}
+
+
+inline bool hit_sphere(sphere_param sphere,
+                       thread const ray & r,
+                       const float t_min,
+                       const float t_max,
+                       thread hit_record & rec) {
+    
+    float3 center = sphere.center.xyz;
+    float radius = sphere.radius;
+    float3 oc = r.origin - center;
+    auto a = length_squared(r.direction);
+    auto halfB = dot(oc, r.direction);
+    auto c = length_squared(oc) - (radius * radius);
+    auto discriminant = (halfB * halfB) - (a * c);
+    if (discriminant < 0) {
+        return false;
+    }
+    
+    auto sqrt_d = sqrt(discriminant);
+    auto root = (-halfB - sqrt_d) / a;
+    if (root < t_min || root > t_max) {
+        root = (-halfB + sqrt_d) / a;
+        if (root < t_min || root > t_max) {
+            return false;
+        }
+    }
+    
+    auto p = r.at(root);
+    auto n = normalize((p - center) / radius);
+    rec.t = root;
+    rec.p = p;
+    rec.set_face_normal(r, n);
+    rec.m = sphere.m;
+    return true;
+}
 
 
 struct hittable_list {
@@ -351,10 +363,10 @@ struct hittable_list {
 public:
     // TODO: Use <array> type
     int count;
-    thread const sphere * items;
+    device const sphere_param * items;
     
 public:
-    hittable_list(int count, sphere items[])
+    hittable_list(int count, device const sphere_param * items)
     : count(count), items(items)
     {}
     
@@ -363,8 +375,8 @@ public:
         float closest = t_max;
         bool hit_anything = false;
         for (auto i = 0; i < count; i++) {
-            const auto item = items[i];
-            if (item.hit(r, t_min, closest, temp_rec) == true) {
+            auto item = items[i];
+            if (hit_sphere(item, r, t_min, closest, temp_rec) == true) {
                 closest = temp_rec.t;
                 rec = temp_rec;
                 hit_anything = true;
@@ -380,15 +392,20 @@ float3 ray_color(thread const ray & primary_ray,
                  thread const hittable_list & world) {
     hit_record rec;
     ray r = primary_ray;
-    const int max_depth = 50;
+    const int max_depth = 100;
     int depth = 0;
     float3 attenuation = float3(1, 1, 1);
+    
+//    auto m = material(1, float3(0.5, 0.5, 0.5), 0.1, 0);
+    
     while (depth < max_depth) {
         //
         if (world.hit(r, 0.001, INFINITY, rec) == true) {
+//            r = ray(rec.p, rec.normal);
+//            return 0.5 * (rec.normal + 1);
             float3 bounce_attenuation;
             ray bounce_ray;
-            if (rec.m->scatter(r, rec, rng, bounce_attenuation, bounce_ray)) {
+            if (scatter(rec.m, r, rec, rng, bounce_attenuation, bounce_ray)) {
                 r = bounce_ray;
                 attenuation = bounce_attenuation * attenuation;
                 depth += 1;
@@ -413,8 +430,9 @@ constant float random_seed [[function_constant(0)]];
 
 kernel void render(texture2d<float, access::read_write> accumulator [[texture(0)]],
                    texture2d<float, access::write> output [[texture(1)]],
-                   constant render_parameters * env [[buffer(0)]],
-                   device const float * noise_buffer [[buffer(1)]],
+                   device const render_params * env [[buffer(0)]],
+                   device const sphere_param * world_param [[buffer(1)]],
+                   device const float * noise_param [[buffer(2)]],
                    uint2 gid [[thread_position_in_grid]]) {
     
     const auto coordinate = uint2(gid.x, accumulator.get_height() - gid.y - 1);
@@ -427,38 +445,48 @@ kernel void render(texture2d<float, access::read_write> accumulator [[texture(0)
     const auto random_seed_index = (gid.y * accumulator.get_width()) + gid.x + env->noise_offset;
     const uint random_seed_index_a = ((random_seed_index * 2) + 0) % env->noise_buffer_size;
     const uint random_seed_index_b = ((random_seed_index * 2) + 1) % env->noise_buffer_size;
-    const auto random_seed_a = fract(noise_buffer[random_seed_index_a]);
-    const auto random_seed_b = fract(noise_buffer[random_seed_index_b]);
+    const auto random_seed_a = fract(noise_param[random_seed_index_a]);
+    const auto random_seed_b = fract(noise_param[random_seed_index_b]);
     const noise noise_a = noise(uv, random_seed_a);
     const noise noise_b = noise(uv, random_seed_b);
     auto rng = random(noise_a, noise_b);
 
     // TODO: Pass camera and scene as parameters
-    const auto look_from = float3(3, 3, 2);
-    const auto look_at = float3(0, 0, -1);
-    const auto vup = float3(0, 1, 0);
-    const auto focus_dist = length(look_from - look_at);
-    const auto aperature = 2.0;
-    const auto fov = 20.0;
-    const auto cam = camera(look_from, look_at, vup, fov, aspect_ratio, aperature, focus_dist);
-//    const auto cam = camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), 90, aspect_ratio, 0.01, 1.0);
+//    const auto look_from = float3(3, 3, 2);
+//    const auto look_at = float3(0, 0, -1);
+//    const auto vup = float3(0, 1, 0);
+//    const auto focus_dist = length(look_from - look_at);
+//    const auto aperature = 2.0;
+//    const auto fov = 20.0;
 
-    auto yellow_lambertian_material = material(0, float3(0.8, 0.8, 0.0), 1, 0);
+    const auto look_from = float3(13, 2, 3);
+    const auto look_at = float3(0, 0, 0);
+    const auto vup = float3(0, 1, 0);
+    const float focus_dist = 10.0;
+    const float aperature = 0.1;
+    const auto fov = 20.0;
+
+    //    const auto fov = 90.0;
+    const auto cam = camera(look_from, look_at, vup, fov, aspect_ratio, aperature, focus_dist);
+//    const auto cam = camera(float3(0, 0, 0), float3(0, 0, -1), float3(0, 1, 0), 90, aspect_ratio, 0.1, 1.0);
+
+//    auto yellow_lambertian_material = material(0, float3(0.8, 0.8, 0.0), 1, 0);
     // auto pink_lambertian_material = material(0, float3(0.7, 0.3, 0.3), 1, 0);
-    auto blue_lambertian_material = material(0, float3(0.1, 0.2, 0.5), 1, 0);
+//    auto blue_lambertian_material = material(0, float3(0.1, 0.2, 0.5), 1, 0);
     // auto gray_metal_material = material(1, float3(0.8, 0.8, 0.8), 0.3, 0);
     // auto brown_metal_material = material(1, float3(0.8, 0.6, 0.2), 0.01, 0);
-    auto gold_metal_material = material(1, float3(1.0, 0.7, 0.3), 0.02, 0);
-    auto glass_material = material(2, float3(1.0, 1.0, 1.0), 0, 1.5);
+//    auto gold_metal_material = material(1, float3(1.0, 0.7, 0.3), 0.02, 0);
+//    auto glass_material = material(2, float3(1.0, 1.0, 1.0), 0, 1.5);
 
-    sphere items[] = {
-        sphere(float3(0, -100.5, -1), 100, &yellow_lambertian_material),
-        sphere(float3(0, 0, -1), 0.49, &blue_lambertian_material),
-        sphere(float3(-1, 0, -1), 0.49, &glass_material),
-        sphere(float3(-1, 0, -1), -0.45, &glass_material),
-        sphere(float3(+1, 0, -1), 0.49, &gold_metal_material),
-    };
-    auto world = hittable_list(5, items);
+//    sphere_param = {
+//        sphere_param(float3(0, -100.5, -1), 100, &yellow_lambertian_material),
+//        sphere_param(float3(0, 0, -1), 0.49, &blue_lambertian_material),
+//        sphere(float3(-1, 0, -1), 0.49, &glass_material),
+//        sphere(float3(-1, 0, -1), -0.45, &glass_material),
+//        sphere(float3(+1, 0, -1), 0.49, &gold_metal_material),
+//    };
+//    auto world = hittable_list(2, items);
+    auto world = hittable_list(env->sphere_count, world_param);
 
     
     auto uv_offset = rng.next_float2(-0.5, +0.5) / dimensions;
