@@ -110,6 +110,51 @@ inline float reflectance(float cosine, float ri) {
 }
 
 
+//inline float2 sampleSphericalMap(const float3 n) {
+//    const float2 invAtan = float2(0.1591, 0.3183);
+//    const float u = atan2(n.z, n.x);
+//    const float v = asin(n.y);
+//    float2 uv = float2(u, v);
+//    uv *= invAtan;
+//    uv += 0.5;
+//    return uv;
+//}
+
+// http://www.yaldex.com/open-gl/ch10lev1sec5.html
+inline float2 worldToSpherical(const float3 n) {
+
+    float2 index;
+    index.y = dot(normalize(n), float3(0, 1, 0));
+    index.x = dot(normalize(float3(n.x, 0, n.z)), float3(1, 0, 0)) * 0.5;
+
+    // Translate index values into proper range
+
+    if (n.z >= 0.0) {
+        index = (index + 1.0) * 0.5;
+    }
+    else
+    {
+        index.y = (index.y + 1.0) * 0.5;
+        index.x = (-index.x) * 0.5 + 1.0;
+    }
+
+    // if reflectDir.z >= 0.0, s will go from 0.25 to 0.75
+    // if reflectDir.z < 0.0, s will go from 0.75 to 1.25, and
+    // that's OK, because we've set the texture to wrap.
+    return float2(index.x, (1 - index.y)) * float2(2, 1);
+}
+
+//float2 worldToSpherical(float3 flatCoord)
+//{
+//    return float2(
+//        atan2(flatCoord.x, flatCoord.y),
+//        acos(flatCoord.z / r)
+//    );
+//}
+
+
+
+
 class noise {
     
 private:
@@ -389,12 +434,14 @@ public:
 
 float3 ray_color(thread const ray & primary_ray,
                  thread random & rng,
-                 thread const hittable_list & world) {
+                 thread const hittable_list & world,
+                 texture2d<float, access::sample> background) {
     hit_record rec;
     ray r = primary_ray;
     const int max_depth = 100;
     int depth = 0;
     float3 attenuation = float3(1, 1, 1);
+    constexpr sampler background_sampler = sampler(coord::normalized, address::repeat, filter::linear);
     
 //    auto m = material(1, float3(0.5, 0.5, 0.5), 0.1, 0);
     
@@ -415,10 +462,15 @@ float3 ray_color(thread const ray & primary_ray,
             }
         }
         else {
-            float3 unit_direction = r.direction;
-            const auto t = 0.5 * (unit_direction.y + 1.0);
-            const auto sky_color = lerp(float3(1.0, 1.0, 1.0), float3(0.5, 0.7, 1.0), t);
-            return attenuation * sky_color;
+//            float3 unit_direction = r.direction;
+//            const auto t = 0.5 * (unit_direction.y + 1.0);
+//            const auto sky_color = lerp(float3(1.0, 1.0, 1.0), float3(0.5, 0.7, 1.0), t);
+//            const auto uv = sampleSphericalMap(r.direction) * float2(1, -1);
+            const auto uv = worldToSpherical(r.direction); // * float2(1, -1);
+            const auto sky_color = background.sample(background_sampler, uv);
+            return attenuation * sky_color.rgb;
+//            return attenuation * pow(1 / log(sky_color.rgb), 1 / 2.2);
+//            return attenuation * pow(sky_color.rgb, 1 / 2.2);
         }
     }
     return float3(0, 0, 0);
@@ -430,6 +482,7 @@ constant float random_seed [[function_constant(0)]];
 
 kernel void render(texture2d<float, access::read_write> accumulator [[texture(0)]],
                    texture2d<float, access::write> output [[texture(1)]],
+                   texture2d<float, access::sample> background [[texture(2)]],
                    device const render_params * env [[buffer(0)]],
                    device const sphere_param * world_param [[buffer(1)]],
                    device const float * noise_param [[buffer(2)]],
@@ -492,14 +545,26 @@ kernel void render(texture2d<float, access::read_write> accumulator [[texture(0)
     auto uv_offset = rng.next_float2(-0.5, +0.5) / dimensions;
     ray r = cam.get_ray(uv + uv_offset, rng);
 //    ray r = cam.get_ray(uv);
-    const auto color = ray_color(r, rng, world);
+    const auto color = ray_color(r, rng, world, background);
     const auto current_color = float4(color, 1);
     const auto input_color = accumulator.read(gid);
     const auto total_color = input_color + current_color;
     accumulator.write(total_color, gid);
     
     const auto average_color = total_color.rgb / env->sample_count;
-    const auto output_color = clamp(sqrt(average_color), 0, 1);
+    
+    // https://learnopengl.com/Advanced-Lighting/HDR
+//    const float gamma = 2.2;
+//        vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+//
+//        // reinhard tone mapping
+//    float3 mapped_color = average_color / (average_color + float3(1.0));
+//        // gamma correction
+//        mapped = pow(mapped, vec3(1.0 / gamma));
+    
+//    const auto output_color = clamp(sqrt(average_color), 0, 1);
+    const auto gamma = 1.0 / float3(2.2);
+    const auto output_color = clamp(pow(average_color, gamma), 0, 1);
 //    const auto output_color = float3(random_seed);
     output.write(float4(output_color.rgb, 1), gid);
 }

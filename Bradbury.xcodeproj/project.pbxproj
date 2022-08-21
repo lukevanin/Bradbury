@@ -7,6 +7,32 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FCF4485628B2C5B700CC31EC /* pretville_cinema_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485128B2C5B600CC31EC /* pretville_cinema_2k.hdr */; };
+		FCF4485728B2C5B700CC31EC /* pretville_cinema_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485128B2C5B600CC31EC /* pretville_cinema_2k.hdr */; };
+		FCF4485828B2C5B700CC31EC /* amphitheatre_zanzibar_fort_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485228B2C5B600CC31EC /* amphitheatre_zanzibar_fort_2k.hdr */; };
+		FCF4485928B2C5B700CC31EC /* amphitheatre_zanzibar_fort_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485228B2C5B600CC31EC /* amphitheatre_zanzibar_fort_2k.hdr */; };
+		FCF4485A28B2C5B700CC31EC /* studio_small_08_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485328B2C5B600CC31EC /* studio_small_08_2k.hdr */; };
+		FCF4485B28B2C5B700CC31EC /* studio_small_08_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485328B2C5B600CC31EC /* studio_small_08_2k.hdr */; };
+		FCF4485C28B2C5B700CC31EC /* sandsloot_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485428B2C5B700CC31EC /* sandsloot_2k.hdr */; };
+		FCF4485D28B2C5B700CC31EC /* sandsloot_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485428B2C5B700CC31EC /* sandsloot_2k.hdr */; };
+		FCF4485E28B2C5B700CC31EC /* st_peters_square_night_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485528B2C5B700CC31EC /* st_peters_square_night_2k.hdr */; };
+		FCF4485F28B2C5B700CC31EC /* st_peters_square_night_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4485528B2C5B700CC31EC /* st_peters_square_night_2k.hdr */; };
+		FCF4486328B2DF4A00CC31EC /* phalzer_forest_01_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486028B2DF4900CC31EC /* phalzer_forest_01_2k.hdr */; };
+		FCF4486428B2DF4A00CC31EC /* phalzer_forest_01_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486028B2DF4900CC31EC /* phalzer_forest_01_2k.hdr */; };
+		FCF4486528B2DF4A00CC31EC /* photo_studio_loft_hall_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486128B2DF4A00CC31EC /* photo_studio_loft_hall_2k.hdr */; };
+		FCF4486628B2DF4A00CC31EC /* photo_studio_loft_hall_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486128B2DF4A00CC31EC /* photo_studio_loft_hall_2k.hdr */; };
+		FCF4486728B2DF4A00CC31EC /* solitude_interior_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486228B2DF4A00CC31EC /* solitude_interior_2k.hdr */; };
+		FCF4486828B2DF4A00CC31EC /* solitude_interior_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486228B2DF4A00CC31EC /* solitude_interior_2k.hdr */; };
+		FCF4486A28B2E37300CC31EC /* rainforest_trail_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486928B2E37300CC31EC /* rainforest_trail_2k.hdr */; };
+		FCF4486B28B2E37300CC31EC /* rainforest_trail_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486928B2E37300CC31EC /* rainforest_trail_2k.hdr */; };
+		FCF4487028B2F42B00CC31EC /* old_room_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486C28B2F42A00CC31EC /* old_room_2k.hdr */; };
+		FCF4487128B2F42B00CC31EC /* old_room_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486C28B2F42A00CC31EC /* old_room_2k.hdr */; };
+		FCF4487228B2F42B00CC31EC /* green_sanctuary_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486D28B2F42A00CC31EC /* green_sanctuary_2k.hdr */; };
+		FCF4487328B2F42B00CC31EC /* green_sanctuary_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486D28B2F42A00CC31EC /* green_sanctuary_2k.hdr */; };
+		FCF4487428B2F42B00CC31EC /* noon_grass_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486E28B2F42B00CC31EC /* noon_grass_2k.hdr */; };
+		FCF4487528B2F42B00CC31EC /* noon_grass_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486E28B2F42B00CC31EC /* noon_grass_2k.hdr */; };
+		FCF4487628B2F42B00CC31EC /* sunset_fairway_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486F28B2F42B00CC31EC /* sunset_fairway_2k.hdr */; };
+		FCF4487728B2F42B00CC31EC /* sunset_fairway_2k.hdr in Resources */ = {isa = PBXBuildFile; fileRef = FCF4486F28B2F42B00CC31EC /* sunset_fairway_2k.hdr */; };
 		FCFCA5A828AD8CBC0015A69E /* BradburyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFCA59828AD8CBA0015A69E /* BradburyApp.swift */; };
 		FCFCA5A928AD8CBC0015A69E /* BradburyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFCA59828AD8CBA0015A69E /* BradburyApp.swift */; };
 		FCFCA5AA28AD8CBC0015A69E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFCA59928AD8CBA0015A69E /* ContentView.swift */; };
@@ -25,6 +51,19 @@
 		FC3A06F028AFA17800C6DE91 /* RendererInterface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RendererInterface.h; sourceTree = "<group>"; };
 		FC3A06F128AFA1FE00C6DE91 /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		FCF4484A28B1A32B00CC31EC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		FCF4485128B2C5B600CC31EC /* pretville_cinema_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = pretville_cinema_2k.hdr; sourceTree = "<group>"; };
+		FCF4485228B2C5B600CC31EC /* amphitheatre_zanzibar_fort_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = amphitheatre_zanzibar_fort_2k.hdr; sourceTree = "<group>"; };
+		FCF4485328B2C5B600CC31EC /* studio_small_08_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = studio_small_08_2k.hdr; sourceTree = "<group>"; };
+		FCF4485428B2C5B700CC31EC /* sandsloot_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = sandsloot_2k.hdr; sourceTree = "<group>"; };
+		FCF4485528B2C5B700CC31EC /* st_peters_square_night_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = st_peters_square_night_2k.hdr; sourceTree = "<group>"; };
+		FCF4486028B2DF4900CC31EC /* phalzer_forest_01_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = phalzer_forest_01_2k.hdr; sourceTree = "<group>"; };
+		FCF4486128B2DF4A00CC31EC /* photo_studio_loft_hall_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = photo_studio_loft_hall_2k.hdr; sourceTree = "<group>"; };
+		FCF4486228B2DF4A00CC31EC /* solitude_interior_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = solitude_interior_2k.hdr; sourceTree = "<group>"; };
+		FCF4486928B2E37300CC31EC /* rainforest_trail_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = rainforest_trail_2k.hdr; sourceTree = "<group>"; };
+		FCF4486C28B2F42A00CC31EC /* old_room_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = old_room_2k.hdr; sourceTree = "<group>"; };
+		FCF4486D28B2F42A00CC31EC /* green_sanctuary_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = green_sanctuary_2k.hdr; sourceTree = "<group>"; };
+		FCF4486E28B2F42B00CC31EC /* noon_grass_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = noon_grass_2k.hdr; sourceTree = "<group>"; };
+		FCF4486F28B2F42B00CC31EC /* sunset_fairway_2k.hdr */ = {isa = PBXFileReference; lastKnownFileType = file; path = sunset_fairway_2k.hdr; sourceTree = "<group>"; };
 		FCFCA59828AD8CBA0015A69E /* BradburyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BradburyApp.swift; sourceTree = "<group>"; };
 		FCFCA59928AD8CBA0015A69E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FCFCA59A28AD8CBC0015A69E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -71,10 +110,23 @@
 				FCFCA59928AD8CBA0015A69E /* ContentView.swift */,
 				FCFCA5B628AD8CD80015A69E /* RenderController.swift */,
 				FCFCA5BF28AE28610015A69E /* CoreGraphicsExtensions.swift */,
+				FC3A06F128AFA1FE00C6DE91 /* Bridging-Header.h */,
 				FC3A06F028AFA17800C6DE91 /* RendererInterface.h */,
 				FCFCA5B928AD8DF70015A69E /* MetalRenderer.metal */,
-				FC3A06F128AFA1FE00C6DE91 /* Bridging-Header.h */,
 				FCFCA59A28AD8CBC0015A69E /* Assets.xcassets */,
+				FCF4485228B2C5B600CC31EC /* amphitheatre_zanzibar_fort_2k.hdr */,
+				FCF4485128B2C5B600CC31EC /* pretville_cinema_2k.hdr */,
+				FCF4485428B2C5B700CC31EC /* sandsloot_2k.hdr */,
+				FCF4485528B2C5B700CC31EC /* st_peters_square_night_2k.hdr */,
+				FCF4486928B2E37300CC31EC /* rainforest_trail_2k.hdr */,
+				FCF4485328B2C5B600CC31EC /* studio_small_08_2k.hdr */,
+				FCF4486028B2DF4900CC31EC /* phalzer_forest_01_2k.hdr */,
+				FCF4486128B2DF4A00CC31EC /* photo_studio_loft_hall_2k.hdr */,
+				FCF4486228B2DF4A00CC31EC /* solitude_interior_2k.hdr */,
+				FCF4486D28B2F42A00CC31EC /* green_sanctuary_2k.hdr */,
+				FCF4486E28B2F42B00CC31EC /* noon_grass_2k.hdr */,
+				FCF4486C28B2F42A00CC31EC /* old_room_2k.hdr */,
+				FCF4486F28B2F42B00CC31EC /* sunset_fairway_2k.hdr */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -175,7 +227,20 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCF4486728B2DF4A00CC31EC /* solitude_interior_2k.hdr in Resources */,
+				FCF4486A28B2E37300CC31EC /* rainforest_trail_2k.hdr in Resources */,
+				FCF4487028B2F42B00CC31EC /* old_room_2k.hdr in Resources */,
+				FCF4487428B2F42B00CC31EC /* noon_grass_2k.hdr in Resources */,
+				FCF4486328B2DF4A00CC31EC /* phalzer_forest_01_2k.hdr in Resources */,
+				FCF4487228B2F42B00CC31EC /* green_sanctuary_2k.hdr in Resources */,
 				FCFCA5AC28AD8CBC0015A69E /* Assets.xcassets in Resources */,
+				FCF4486528B2DF4A00CC31EC /* photo_studio_loft_hall_2k.hdr in Resources */,
+				FCF4485828B2C5B700CC31EC /* amphitheatre_zanzibar_fort_2k.hdr in Resources */,
+				FCF4485C28B2C5B700CC31EC /* sandsloot_2k.hdr in Resources */,
+				FCF4485628B2C5B700CC31EC /* pretville_cinema_2k.hdr in Resources */,
+				FCF4487628B2F42B00CC31EC /* sunset_fairway_2k.hdr in Resources */,
+				FCF4485E28B2C5B700CC31EC /* st_peters_square_night_2k.hdr in Resources */,
+				FCF4485A28B2C5B700CC31EC /* studio_small_08_2k.hdr in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,7 +248,20 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCF4486828B2DF4A00CC31EC /* solitude_interior_2k.hdr in Resources */,
+				FCF4486B28B2E37300CC31EC /* rainforest_trail_2k.hdr in Resources */,
+				FCF4487128B2F42B00CC31EC /* old_room_2k.hdr in Resources */,
+				FCF4487528B2F42B00CC31EC /* noon_grass_2k.hdr in Resources */,
+				FCF4486428B2DF4A00CC31EC /* phalzer_forest_01_2k.hdr in Resources */,
+				FCF4487328B2F42B00CC31EC /* green_sanctuary_2k.hdr in Resources */,
 				FCFCA5AD28AD8CBC0015A69E /* Assets.xcassets in Resources */,
+				FCF4486628B2DF4A00CC31EC /* photo_studio_loft_hall_2k.hdr in Resources */,
+				FCF4485928B2C5B700CC31EC /* amphitheatre_zanzibar_fort_2k.hdr in Resources */,
+				FCF4485D28B2C5B700CC31EC /* sandsloot_2k.hdr in Resources */,
+				FCF4485728B2C5B700CC31EC /* pretville_cinema_2k.hdr in Resources */,
+				FCF4487728B2F42B00CC31EC /* sunset_fairway_2k.hdr in Resources */,
+				FCF4485F28B2C5B700CC31EC /* st_peters_square_night_2k.hdr in Resources */,
+				FCF4485B28B2C5B700CC31EC /* studio_small_08_2k.hdr in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
