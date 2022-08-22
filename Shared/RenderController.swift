@@ -81,7 +81,7 @@ final class MetalRenderer {
             }()
         )!
         
-        let backgroundTextureURL = Bundle.main.url(forResource: "solitude_interior_2k", withExtension: "hdr")!
+        let backgroundTextureURL = Bundle.main.url(forResource: "studio_small_08_2k", withExtension: "hdr")!
         self.backgroundTexture = loadHDR(device: device, url: backgroundTextureURL)!
         
         // TODO: Use cpu write combined mode for write-only buffers
@@ -96,9 +96,15 @@ final class MetalRenderer {
             roughness: 0,
             indexOfRefraction: 0
         )
+        let greenMaterial = MaterialParam(
+            type: 0,
+            albedo: simd_float3(0.1, 0.5, 0.1),
+            roughness: 0,
+            indexOfRefraction: 0
+        )
         let whiteMaterial = MaterialParam(
             type: 0,
-            albedo: simd_float3(0.8, 0.8, 0.8),
+            albedo: simd_float3(0.5, 0.5, 0.5),
             roughness: 0,
             indexOfRefraction: 0
         )
@@ -110,7 +116,7 @@ final class MetalRenderer {
         )
         let metalMaterial = MaterialParam(
             type: 1,
-            albedo: simd_float3(0.8, 0.8, 0.8),
+            albedo: simd_float3(0.7, 0.7, 0.7),
             roughness: 0.05,
             indexOfRefraction: 0.0
         )
@@ -226,19 +232,19 @@ final class MetalRenderer {
 //                )
 //            )
 //        )
-        world.append(
-            SphereParam(
-                center: center,
-                radius: 0.7,
-                material: whiteMaterial
-            )
-        )
+//        world.append(
+//            SphereParam(
+//                center: center,
+//                radius: 0.7,
+//                material: blueMaterial
+//            )
+//        )
         world.append(
             SphereParam(
                 center: center,
                 radius: 1,
-//                material: metalMaterial
-                material: glassMaterial
+                material: metalMaterial
+//                material: glassMaterial
             )
         )
 //        world.append(
@@ -372,8 +378,8 @@ final class MetalRenderer {
     @Published var image: CGImage?
     
     private lazy var renderer = MetalRenderer(
-        width: 1200,
-        height: 600,
+        width: 800,
+        height: 400,
         device: MTLCreateSystemDefaultDevice()!
     )
     

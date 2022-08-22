@@ -121,28 +121,28 @@ inline float reflectance(float cosine, float ri) {
 //}
 
 // http://www.yaldex.com/open-gl/ch10lev1sec5.html
-inline float2 worldToSpherical(const float3 n) {
+//inline float2 worldToSpherical(const float3 n) {
 
-    float2 index;
-    index.y = dot(normalize(n), float3(0, 1, 0));
-    index.x = dot(normalize(float3(n.x, 0, n.z)), float3(1, 0, 0)) * 0.5;
-
-    // Translate index values into proper range
-
-    if (n.z >= 0.0) {
-        index = (index + 1.0) * 0.5;
-    }
-    else
-    {
-        index.y = (index.y + 1.0) * 0.5;
-        index.x = (-index.x) * 0.5 + 1.0;
-    }
-
-    // if reflectDir.z >= 0.0, s will go from 0.25 to 0.75
-    // if reflectDir.z < 0.0, s will go from 0.75 to 1.25, and
-    // that's OK, because we've set the texture to wrap.
-    return float2(index.x, (1 - index.y)) * float2(2, 1);
-}
+//    float2 index;
+//    index.y = dot(normalize(n), float3(0, 1, 0));
+//    index.x = dot(normalize(float3(n.x, 0, n.z)), float3(1, 0, 0)) * 0.5;
+//
+//    // Translate index values into proper range
+//
+//    if (n.z >= 0.0) {
+//        index = (index + 1.0) * 0.5;
+//    }
+//    else
+//    {
+//        index.y = (index.y + 1.0) * 0.5;
+//        index.x = (-index.x) * 0.5 + 1.0;
+//    }
+//
+//    // if reflectDir.z >= 0.0, s will go from 0.25 to 0.75
+//    // if reflectDir.z < 0.0, s will go from 0.75 to 1.25, and
+//    // that's OK, because we've set the texture to wrap.
+//    return float2(index.x, (1 - index.y)) * float2(2, 1);
+//}
 
 //float2 worldToSpherical(float3 flatCoord)
 //{
@@ -151,6 +151,17 @@ inline float2 worldToSpherical(const float3 n) {
 //        acos(flatCoord.z / r)
 //    );
 //}
+
+constant float2 invAtan = float2(1/(2*M_PI_F), 1/M_PI_F);   // float2(1/2π, 1/π);
+
+float2 worldToSpherical(const float3 n) {
+//    const float2 invAtan = float2(0.1591, 0.3183);
+
+    float2 uv = float2(atan2(n.x, n.z), asin(-n.y));
+    uv *= invAtan;
+    uv += 0.5;
+    return uv;
+}
 
 
 
